@@ -1,9 +1,8 @@
-# Queuem
-
+# Queuem 
 Queuefy heavy Node.js tasks
 
 
-Lightweight and silent module that helps you limit amount of simultaneous running processes such as PhantomJS, ImageMagick, etc. Originally made for [Page Check](https://www.npmjs.com/package/page-check) module.
+Lightweight and silent module that helps you limit the amount of simultaneous running processes such as PhantomJS, ImageMagick, FFmpeg, etc. Originally made for [Page Check](https://www.npmjs.com/package/page-check) module.
 
 
 
@@ -11,49 +10,71 @@ Lightweight and silent module that helps you limit amount of simultaneous runnin
 ```javascript
 const Queuem = require('queuem');
 
-function PhantomTask1(){
-   return new Promise((resolve, reject) => {
-      resolve();
-   });
+function PhantomTask(){
+   return Promise.resolve('done: PhantomJs');
 }
 
-function PhantomTask2(){
-   return new Promise((resolve, reject) => {
-      resolve();
-   });
+function ImageMagickTask(){
+   return Promise.resolve('done: ImageMagick');
 }
 
-let tasks = new Queuem(4, () => {
-   console.log('completed!');
-});
+function FFmpegTask(){
+   return Promise.resolve('done: FFmpeg');
+}
 
-tasks.add(PhantomTask1);
-tasks.add(PhantomTask2);
+let tasks = new Queuem({
+   concurrent: 1, 
+   taskDone: (data) => {
+      console.log(data);
+   },
+   onComplete: () => {
+      console.log('completed!');
+   }
+})
+
+tasks.add(PhantomTask);
+tasks.add(ImageMagickTask);
+tasks.add(FFmpegTask);
 ```
 
 
 
-## Arguments
+## Options
 
-### max_concurrent 
+### concurrent 
 __type__: *Number*<br>
-__default__: 3<br>
+__default__: 1<br>
 
-Maximum number of concurrent tasks.<br>
-Could be skipped.
+Maximum number of concurrent tasks<br>
 
 
-### on_complete 
+### taskDone 
 __type__: *Function*<br>
 
-Fires when all tasks are done.<br>
-Could be skipped.
+This callback triggered for each completed task and receives the result/exeption of the promise<br>
+
+
+### onComplete 
+__type__: *Function*<br>
+
+Fires when all tasks are done<br>
 
 
 
-## Method
+## Props/Methods
 
-### add(`task`)
-Argument is a function that returns Promise.
+### .con = `Number`
+__type__: *Setter function*<br>
 
+Changes amount of concurrent tasks
+
+
+### .add(`task`)
+Accepts argument which is a function that returns a Promise
+
+
+#### 2018-02-18 (v1.1.0):
+- changed API, now constructor has only one argument
+- added callback function for each finished task
+- added `con` setter to changes the amount of concurrent tasks 'on the fly'
 
