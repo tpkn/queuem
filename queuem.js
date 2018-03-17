@@ -1,52 +1,94 @@
 /*!
- * Queuem (v1.0.0.20180317), http://tpkn.me/
+ * Queuem (v1.1.0.20180318), http://tpkn.me/
  */
 
-function Queuem(max_concurrent, on_complete){
-   let task;
-   let queue = [];
-   let current = 0;
+class Queuem {
+   constructor(options){
+      this.task;
+      this.queue = [];
+      this.processing = 0;
 
-   if(typeof max_concurrent === 'function'){
-      on_complete = max_concurrent;
-   }
+      this.concurrent = 1;
+      this.onTaskDone = () => {};
+      this.onComplete = () => {};
 
-   if(typeof max_concurrent !== 'number'){
-      max_concurrent = 3;
-   }
-
-   if(max_concurrent < 1){
-      max_concurrent = 1;
-   }
-
-   function add(task){
-      queue.push(task);
-      on_change();
-   }
-
-   function on_change(){
-      if(queue.length == 0 && current == 0){
-         if(typeof on_complete === 'function'){
-            on_complete();
+      if(typeof options === 'object'){
+         if(typeof options.concurrent === 'number' && options.concurrent > 0){
+            this.concurrent = options.concurrent;
+         }
+         if(typeof options.taskDone === 'function'){
+            this.onTaskDone = options.taskDone;
+         }
+         if(typeof options.onComplete === 'function'){
+            this.onComplete = options.onComplete;
          }
       }
+   }
 
-      if(current < max_concurrent && queue.length > 0){
-         current++;
+   /**
+    * Add new task in a queue
+    * @param {Function} task
+    */
+   add(task){
+      this.queue.push(task);
+      this.onChange();
+   }
 
-         task = queue.shift();
+   /**
+    * Start the next task in a queue
+    */
+   runTask(){
+      if(this.queue.length > 0){
+         this.processing++;
 
-         task().then(r => {
-            current--;
-            on_change();
-         }, err => {
-            current--;
-            on_change();
+         this.task = this.queue.shift();
+
+         this.task().then(result => {
+            this.taskDone(result);
+         }).catch(err => {
+            this.taskDone(err);
          })
       }
    }
 
-   return { add, queue };
+   /**
+    * Some task has been completed right now
+    * @param  {Object} results
+    */
+   taskDone(results){
+      this.processing--;
+      this.onTaskDone(results);
+      this.onChange();
+   }
+
+   /**
+    * Something just changed
+    */
+   onChange(){
+      if(this.queue.length == 0 && this.processing == 0){
+         this.onComplete();
+      }
+
+      if(this.processing < this.concurrent && this.queue.length > 0){
+         this.runTask();
+      };
+   }
+
+   /**
+    * Set amount of concurrent tasks
+    * @param  {Number} n
+    */
+   set con(n){
+      if(typeof n === 'number' && n > 0){
+         this.concurrent = n;
+
+         let p = this.processing;
+         while(p < this.concurrent){
+            this.runTask();
+            p++;
+         }
+      }
+   }
 }
 
 module.exports = Queuem;
