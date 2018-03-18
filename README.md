@@ -42,8 +42,8 @@ queuem.add(FFmpegTask);
 ## Queuem({ concurrent, taskDone, onComplete })
 
 ### concurrent 
-__type__: *Number*
-__default__: 1
+__type__: *Number*<br>
+__default__: 1<br>
 
 Maximum number of concurrent tasks<br>
 
