@@ -1,4 +1,4 @@
-# Queuem 
+# Queuem
 Queuefy heavy Node.js tasks
 
 
@@ -22,7 +22,7 @@ function FFmpegTask(){
    return Promise.resolve('done: FFmpeg');
 }
 
-let tasks = new Queuem({
+let queuem = new Queuem({
    concurrent: 1, 
    taskDone: (data) => {
       console.log(data);
@@ -32,14 +32,14 @@ let tasks = new Queuem({
    }
 })
 
-tasks.add(PhantomTask);
-tasks.add(ImageMagickTask);
-tasks.add(FFmpegTask);
+queuem.add(PhantomTask);
+queuem.add(ImageMagickTask);
+queuem.add(FFmpegTask);
 ```
 
 
 
-## Options
+## Queuem({ concurrent, taskDone, onComplete })
 
 ### concurrent 
 __type__: *Number*<br>
@@ -60,20 +60,18 @@ __type__: *Function*<br>
 Fires when all tasks are done<br>
 
 
-
-## Props/Methods
-
-### .con = `Number`
+### queuem.con = `Number`
 __type__: *Setter function*<br>
 
 Changes amount of concurrent tasks
 
 
-### .add(`task`)
+### queuem.add(`task`)
 Accepts argument which is a function that returns a Promise
 
 
-#### 2018-02-18 (v1.1.0):
+## Changelog 
+#### 2018-02-18 (v1.1.1):
 - changed API, now constructor has only one argument
 - added callback function for each finished task
 - added `con` setter to changes the amount of concurrent tasks 'on the fly'

@@ -1,5 +1,5 @@
 /*!
- * Queuem (v1.1.0.20180318), http://tpkn.me/
+ * Queuem (v1.1.1.20180318), http://tpkn.me/
  */
 
 class Queuem {
