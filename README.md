@@ -77,7 +77,7 @@ function RandomTask(){
 ## Changelog 
 #### v2.0.0 (2018-05-12):
 - no more callbacks, just clean and simple events
-- setter of concurrent tasks amount renamed from 'con' to `concurrent`
+- setter of concurrent tasks amount renamed from `con` to `concurrent`
 
 
 #### v1.1.1 (2018-02-18):
