@@ -1,75 +1,65 @@
 /*!
- * Queuem (v1.1.1.20180318), http://tpkn.me/
+ * Queuem, http://tpkn.me/
  */
 
-class Queuem {
-   constructor(options){
+const EventEmitter = require('events').EventEmitter;
+
+class Queuem extends EventEmitter {
+   constructor() {
+      super();
+
       this.task;
       this.queue = [];
       this.processing = 0;
-
-      this.concurrent = 1;
-      this.onTaskDone = () => {};
-      this.onComplete = () => {};
-
-      if(typeof options === 'object'){
-         if(typeof options.concurrent === 'number' && options.concurrent > 0){
-            this.concurrent = options.concurrent;
-         }
-         if(typeof options.taskDone === 'function'){
-            this.onTaskDone = options.taskDone;
-         }
-         if(typeof options.onComplete === 'function'){
-            this.onComplete = options.onComplete;
-         }
-      }
+      this._concurrent = 1;
    }
 
    /**
     * Add new task in a queue
     * @param {Function} task
     */
-   add(task){
+   add(task) {
+      this.emit('task_added', {});
       this.queue.push(task);
-      this.onChange();
+      this.queueChanged();
    }
 
    /**
     * Start the next task in a queue
     */
-   runTask(){
-      if(this.queue.length > 0){
+   runTask() {
+      if (this.queue.length > 0) {
          this.processing++;
 
          this.task = this.queue.shift();
 
-         this.task().then(result => {
-            this.taskDone(result);
+         this.task().then(data => {
+            this.taskDone(null, data);
          }).catch(err => {
-            this.taskDone(err);
+            this.taskDone(err, null);
          })
       }
    }
 
    /**
     * Some task has been completed right now
-    * @param  {Object} results
+    * @param  {Object} result
     */
-   taskDone(results){
+   taskDone(err, result) {
+      this.emit('task_done', { result: result, err: err });
       this.processing--;
-      this.onTaskDone(results);
-      this.onChange();
+      this.queueChanged();
    }
 
    /**
     * Something just changed
     */
-   onChange(){
-      if(this.queue.length == 0 && this.processing == 0){
-         this.onComplete();
+   queueChanged() {
+      if (this.queue.length == 0 && this.processing == 0) {
+         this.emit('complete');
       }
 
-      if(this.processing < this.concurrent && this.queue.length > 0){
+      if (this.processing < this._concurrent && this.queue.length > 0) {
          this.runTask();
       };
    }
@@ -78,12 +68,12 @@ class Queuem {
     * Set amount of concurrent tasks
     * @param  {Number} n
     */
-   set con(n){
-      if(typeof n === 'number' && n > 0){
-         this.concurrent = n;
+   set concurrent(n) {
+      if (typeof n === 'number' && n > 0 && this._concurrent !== n) {
+         this._concurrent = n;
 
          let p = this.processing;
-         while(p < this.concurrent){
+         while (p < this._concurrent) {
             this.runTask();
             p++;
          }

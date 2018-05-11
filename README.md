@@ -6,72 +6,81 @@ Lightweight and silent module that helps you limit the amount of simultaneous ru
 
 
 
+## API
+
+### .queue   
+Type: _Array_  
+Queued tasks list   
+
+
+### .processing   
+Type: _Number_  
+Amount of currently running tasks   
+
+
+### .concurrent
+Type: _Number_  
+Default: `1`   
+Amount of concurrent tasks   
+
+
+### .add()
+Type: _Function_    
+Adds new task. Task should return promise
+
+
+## Events
+
+### task_added
+
+### task_done
+Returns task promise result or and error `{ result, err }`  
+
+### complete
+Fires when queue is empty and there are no running tasks
+
+
+
+
 ## Usage
 ```javascript
 const Queuem = require('queuem');
 
-function PhantomTask(){
-   return Promise.resolve('done: PhantomJs');
-}
+let tasks = new Queuem();
 
-function ImageMagickTask(){
-   return Promise.resolve('done: ImageMagick');
-}
-
-function FFmpegTask(){
-   return Promise.resolve('done: FFmpeg');
-}
-
-let queuem = new Queuem({
-   concurrent: 1, 
-   taskDone: (data) => {
-      console.log(data);
-   },
-   onComplete: () => {
-      console.log('completed!');
-   }
+tasks.on('task_done', function(data){
+   console.log('task done:', data);
 })
 
-queuem.add(PhantomTask);
-queuem.add(ImageMagickTask);
-queuem.add(FFmpegTask);
+tasks.on('complete', function(){
+   console.log('complete');
+})
+
+
+for(let i = 0, len = 20; i < len; i++){
+   tasks.add(RandomTask);
+}
+
+function RandomTask(){
+   return new Promise((resolve, reject) => {
+      let time = Date.now();
+      setTimeout(() => {
+         return Math.random() > 0.5 ? resolve({ name: 'RandomTask', time: (Date.now() - time) / 1000 }) : reject('fu!');
+      }, Math.random() * 1500);
+   })
+}
 ```
 
 
 
-## Queuem({ concurrent, taskDone, onComplete })
-
-### concurrent 
-__type__: *Number*<br>
-__default__: 1<br>
-
-Maximum number of concurrent tasks<br>
-
-
-### taskDone 
-__type__: *Function*<br>
-
-This callback triggered for each completed task and receives the result/exeption of the promise<br>
-
-
-### onComplete 
-__type__: *Function*<br>
-
-Fires when all tasks are done<br>
-
-
-### queuem.con = `Number`
-__type__: *Setter function*<br>
-
-Changes amount of concurrent tasks
-
-
-### queuem.add(`task`)
-Accepts argument which is a function that returns a Promise
-
 
 ## Changelog 
-#### 2018-02-18 (v1.1.1):
+#### v2.0.0 (2018-05-12):
+- no more callbacks, just clean and simple events
+- setter of concurrent tasks amount renamed from 'con' to `concurrent`
+
+
+#### v1.1.1 (2018-02-18):
 - changed API, now constructor has only one argument
 - added callback function for each finished task
 - added `con` setter to changes the amount of concurrent tasks 'on the fly'
