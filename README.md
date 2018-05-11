@@ -37,12 +37,12 @@ Adds new task. Task should return promise
 Returns task promise result or and error `{ result, err }`  
 
 ### complete
-Fires when queue is empty and there are no running tasks
+Fires when queue is empty and there are no running tasks   
 
 
 
 
-## Usage
+## Usage   
 ```javascript
 const Queuem = require('queuem');
 
