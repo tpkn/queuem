@@ -6,6 +6,13 @@ Lightweight and silent module that helps you limit the amount of simultaneous ru
 
 
 
+## Installation
+```bash
+npm install queuem
+```
+
+
+
 ## API
 
 ### .queue   
