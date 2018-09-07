@@ -15,25 +15,27 @@ npm install queuem
 
 ## API
 
+### new Queuem()
+
 ### .queue   
-Type: _Array_  
+**Type**: _Array_  
 Queued tasks list   
 
 
 ### .processing   
-Type: _Number_  
+**Type**: _Number_  
 Amount of currently running tasks   
 
 
 ### .concurrent
-Type: _Number_  
-Default: `1`   
+**Type**: _Number_  
+**Default**: `1`   
 Amount of concurrent tasks   
 
 
-### .add()
-Type: _Function_    
-Adds new task. Task should return promise
+### .add([ task, args ])
+**Type**: _Function_    
+Adds new task. Task should return a promise
 
 
 ## Events
@@ -65,14 +67,14 @@ tasks.on('complete', function(){
 
 
 for(let i = 0, len = 20; i < len; i++){
-   tasks.add(RandomTask);
+   tasks.add(RandomTask, { uid: Math.random().toString(16).replace('.', '') });
 }
 
-function RandomTask(){
+function RandomTask(data){
    return new Promise((resolve, reject) => {
       let time = Date.now();
       setTimeout(() => {
-         return Math.random() > 0.5 ? resolve({ name: 'RandomTask', time: (Date.now() - time) / 1000 }) : reject('fu!');
+         return Math.random() > 0.5 ? resolve({ name: 'RandomTask ' + data.uid }) : reject('nope');
       }, Math.random() * 1500);
    })
 }
@@ -82,6 +84,10 @@ function RandomTask(){
 
 
 ## Changelog 
+#### v2.1.0 (2018-09-09):
+- additional data could be to passed to queued task
+
+
 #### v2.0.0 (2018-05-12):
 - no more callbacks, just clean and simple events
 - setter of concurrent tasks amount renamed from `con` to `concurrent`

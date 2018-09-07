@@ -31,13 +31,15 @@ class Queuem extends EventEmitter {
       if (this.queue.length > 0) {
          this.processing++;
 
-         this.task = this.queue.shift();
+         this.current = this.queue.shift();
 
-         this.task().then(data => {
+         this.current.task(this.current.args)
+         .then(data => {
             this.taskDone(null, data);
-         }).catch(err => {
-            this.taskDone(err, null);
          })
+         .catch(err => {
+            this.taskDone(err, null);
+         });
       }
    }
 
@@ -46,7 +48,7 @@ class Queuem extends EventEmitter {
     * @param  {Object} result
     */
    taskDone(err, result) {
-      this.emit('task_done', { result: result, err: err });
+      this.emit('task_done', { result, err });
       this.processing--;
       this.queueChanged();
    }
