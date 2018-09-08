@@ -8,7 +8,7 @@ class Queuem extends EventEmitter {
    constructor() {
       super();
 
-      this.task;
+      this.current;
       this.queue = [];
       this.processing = 0;
       this._concurrent = 1;
@@ -18,9 +18,9 @@ class Queuem extends EventEmitter {
     * Add new task in a queue
     * @param {Function} task
     */
-   add(task) {
+   add(task, args = {}) {
       this.emit('task_added', {});
-      this.queue.push(task);
+      this.queue.push({ task, args });
       this.queueChanged();
    }
 
