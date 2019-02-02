@@ -40,10 +40,11 @@ Adds new task. Task should return a promise
 
 ## Events
 
-### task_added
+### +1
+Useless event, but let it be
 
-### task_done
-Returns task promise result or and error `{ result, err }`  
+### -1
+Returns task promise result as object `{ err, result }`
 
 ### complete
 Fires when queue is empty and there are no running tasks   
@@ -55,26 +56,31 @@ Fires when queue is empty and there are no running tasks
 ```javascript
 const Queuem = require('queuem');
 
-let tasks = new Queuem();
-
-tasks.on('task_done', function(data){
-   console.log('task done:', data);
+let Tasks = new Queuem()
+.on('+1', () => {
+   console.log('+1');
 })
+.on('-1', (results) => {
+   if(results.err){
+      return console.log('-1', '=>', results.err);
+   }
 
-tasks.on('complete', function(){
+   console.log('-1', '=>', results.data.some_data);
+})
+.on('complete', () => {
    console.log('complete');
 })
 
 
 for(let i = 0, len = 20; i < len; i++){
-   tasks.add(RandomTask, { uid: Math.random().toString(16).replace('.', '') });
+   Tasks.add(RandomTask, { uid: Math.random().toString(16) });
 }
 
 function RandomTask(data){
    return new Promise((resolve, reject) => {
       let time = Date.now();
       setTimeout(() => {
-         return Math.random() > 0.5 ? resolve({ name: 'RandomTask ' + data.uid }) : reject('nope');
+         return Math.random() > 0.5 ? resolve({ some_data: data.uid }) : reject('nope');
       }, Math.random() * 1500);
    })
 }
@@ -84,6 +90,9 @@ function RandomTask(data){
 
 
 ## Changelog 
+#### v2.2.0 (2019-02-03):
+- events name become shorter (`task_done` => `-1`)
+
 #### v2.1.0 (2018-09-09):
 - additional data could be to passed to queued task
 

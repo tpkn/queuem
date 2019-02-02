@@ -1,7 +1,6 @@
 /*!
  * Queuem, http://tpkn.me/
  */
-
 const EventEmitter = require('events').EventEmitter;
 
 class Queuem extends EventEmitter {
@@ -19,7 +18,7 @@ class Queuem extends EventEmitter {
     * @param {Function} task
     */
    add(task, args = {}) {
-      this.emit('task_added', {});
+      this.emit('+1');
       this.queue.push({ task, args });
       this.queueChanged();
    }
@@ -45,10 +44,10 @@ class Queuem extends EventEmitter {
 
    /**
     * Some task has been completed right now
-    * @param  {Object} result
+    * @param  {Object} data
     */
-   taskDone(err, result) {
-      this.emit('task_done', { result, err });
+   taskDone(err, data) {
+      this.emit('-1', { err, data });
       this.processing--;
       this.queueChanged();
    }
