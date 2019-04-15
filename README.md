@@ -44,7 +44,10 @@ Adds new task. Task should return a promise
 Useless event, but let it be
 
 ### -1
-Returns task promise result as object `{ err, result }`
+Returns task promise result as object `{ error, result }`
+
+### change
+Combination of `+1` and `-1` in a single event
 
 ### complete
 Fires when queue is empty and there are no running tasks   
@@ -60,12 +63,15 @@ let Tasks = new Queuem()
 .on('+1', () => {
    console.log('+1');
 })
-.on('-1', (results) => {
-   if(results.err){
-      return console.log('-1', '=>', results.err);
+.on('-1', (result) => {
+   if(result.error){
+      return console.log('-1', '=>', result.error);
    }
 
-   console.log('-1', '=>', results.data.some_data);
+   console.log('-1', '=>', result.data.some_data);
+})
+.on('change', (result) => {
+	console.log(result.type, '=>', result.data);
 })
 .on('complete', () => {
    console.log('complete');
@@ -90,6 +96,9 @@ function RandomTask(data){
 
 
 ## Changelog 
+#### v2.3.0 (2019-04-15):
+- added `change` event
+
 #### v2.2.0 (2019-02-03):
 - events name become shorter (`task_done` => `-1`)
 

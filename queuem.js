@@ -19,6 +19,7 @@ class Queuem extends EventEmitter {
     */
    add(task, args = {}) {
       this.emit('+1');
+      this.emit('change', { type: '+1', error: null, data: null });
       this.queue.push({ task, args });
       this.queueChanged();
    }
@@ -46,8 +47,9 @@ class Queuem extends EventEmitter {
     * Some task has been completed right now
     * @param  {Object} data
     */
-   taskDone(err, data) {
-      this.emit('-1', { err, data });
+   taskDone(error, data) {
+      this.emit('-1', { error, data });
+      this.emit('change', { type: '-1', error, data });
       this.processing--;
       this.queueChanged();
    }
