@@ -97,6 +97,7 @@ function RandomTask(data){
 
 ## Changelog 
 #### v2.3.0 (2019-04-15):
+- fixed argument passing
 - added `change` event
 
 #### v2.2.0 (2019-02-03):
