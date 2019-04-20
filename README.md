@@ -14,8 +14,9 @@ npm install queuem
 
 
 ## API
-
-### new Queuem()
+```javascript
+new Queuem()
+```
 
 ### .queue   
 **Type**: _Array_  
@@ -33,7 +34,7 @@ Amount of currently running tasks
 Amount of concurrent tasks   
 
 
-### .add([ task, args ])
+### .add(task[, args])
 **Type**: _Function_    
 Adds new task. Task should return a promise
 
