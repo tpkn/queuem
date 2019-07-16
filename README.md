@@ -1,4 +1,4 @@
-# Queuem
+# Queuem [![npm Package](https://img.shields.io/npm/v/queuem.svg)](https://www.npmjs.org/package/queuem)
 Queuefy heavy Node.js tasks
 
 
