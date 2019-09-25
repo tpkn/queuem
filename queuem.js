@@ -2,84 +2,111 @@
  * Queuem, http://tpkn.me/
  */
 const EventEmitter = require('events').EventEmitter;
+const Events = {
+   TASK_ADDED    : 'added',
+   TASK_DONE     : 'done',
+   QUEUE_CHANGED : 'changed',
+   QUEUE_EMPTY   : 'empty',
+}
 
 class Queuem extends EventEmitter {
-   constructor() {
+   constructor(options = {}){
       super();
 
-      this.current;
+      let { 
+         parallel = 1
+      } = options;
+
       this.queue = [];
       this.processing = 0;
-      this._concurrent = 1;
+      this._parallel = 1;
+      this.parallel = parallel;
    }
 
+
    /**
-    * Add new task in a queue
     * @param {Function} task
+    * @param {Any}      data
     */
-   add(task, ...args) {
-      this.emit('+1');
-      this.emit('change', { type: '+1', error: null, data: null });
-      this.queue.push({ task, args });
-      this.queueChanged();
+   append(task, data){
+      this._addTask(task, data);
    }
 
-   /**
-    * Start the next task in a queue
-    */
-   runTask() {
-      if (this.queue.length > 0) {
-         this.processing++;
-
-         this.current = this.queue.shift();
-         this.current.task.apply(null, this.current.args)
-         .then(data => {
-            this.taskDone(null, data);
-         })
-         .catch(err => {
-            this.taskDone(err, null);
-         });
-      }
+   prepend(task, data){
+      this._addTask(task, data, { prepend: true });
    }
 
+
    /**
-    * Some task has been completed right now
-    * @param  {Object} data
+    * Get/set the amount of parallel tasks
     */
-   taskDone(error, data) {
-      this.emit('-1', { error, data });
-      this.emit('change', { type: '-1', error, data });
-      this.processing--;
-      this.queueChanged();
+   get parallel(){
+      return this._parallel;
    }
 
-   /**
-    * Something just changed
-    */
-   queueChanged() {
-      if (this.queue.length == 0 && this.processing == 0) {
-         this.emit('complete');
-      }
-
-      if (this.processing < this._concurrent && this.queue.length > 0) {
-         this.runTask();
-      };
-   }
-
-   /**
-    * Set amount of concurrent tasks
-    * @param  {Number} n
-    */
-   set concurrent(n) {
-      if (typeof n === 'number' && n > 0 && this._concurrent !== n) {
-         this._concurrent = n;
+   set parallel(value){
+      if (typeof value === 'number' && value >= 1 && this._parallel !== value){
+         this._parallel = Math.floor(value);
 
          let p = this.processing;
-         while (p < this._concurrent) {
-            this.runTask();
+         while (p < this._parallel){
+            this._nextTask();
             p++;
          }
       }
+   }
+
+
+   /**
+    * Append/prepend new task to the queue
+    * 
+    * @param   {Function}   task      
+    * @param   {Any}        data      
+    * @param   {Object}     options   
+    */
+   _addTask(task, data, options = {}){
+      if(typeof task !== 'function'){
+         throw new TypeError('First argument should be a Function')
+      }
+
+      let { prepend } = options;
+      
+      if(prepend){
+         this.queue.unshift({ task, data });
+      }else{
+         this.queue.push({ task, data });
+      }
+
+      this.emit(Events.TASK_ADDED);
+      this.emit(Events.QUEUE_CHANGED, { action: Events.TASK_ADDED });
+      this._queueChanged();
+   }
+
+   _nextTask(){
+      if(this.queue.length > 0){
+         this.processing++;
+
+         let current = this.queue.shift();
+         current.task.call(null, current.data, (...args) => this._taskDone.apply(this, args));
+      }
+   }
+
+   _taskDone(result){
+      this.processing--;
+
+      this.emit(Events.TASK_DONE, result);
+      this.emit(Events.QUEUE_CHANGED, { action: Events.TASK_DONE });
+      this._queueChanged();
+   }
+
+   _queueChanged(){
+      if (this.queue.length == 0 && this.processing == 0){
+         this.emit(Events.QUEUE_EMPTY);
+      }
+
+      if (this.processing < this._parallel && this.queue.length > 0){
+         this._nextTask();
+      };
    }
 }
 

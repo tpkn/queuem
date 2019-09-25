@@ -1,57 +1,119 @@
 # Queuem [![npm Package](https://img.shields.io/npm/v/queuem.svg)](https://www.npmjs.org/package/queuem)
-Queuefy heavy Node.js tasks
+Run a sh*tload of tasks in parallel
 
+It is made for cases when you need to run 1,000,000 tasks (parsing files, API requests, etc.) in your app, and not hear from Node.js whining that it cannot do something because of some limitations.
 
-Lightweight and silent module that helps you limit the amount of simultaneous running processes such as PhantomJS, ImageMagick, FFmpeg, etc. Originally made for [Page Check](https://www.npmjs.com/package/page-check) module.
+Was originally made for [Page Check](https://www.npmjs.com/package/page-check) module.
 
-
-
-## Installation
-```bash
-npm install queuem
-```
+### Keep in mind:
+ * No need for local storage or database.
+ * The queue exists within the current Node.js process. 
+ * Based on Node.js `EventEmitter` and has a few [subtleties of use](https://nodejs.org/api/events.html#events_eventemitter_defaultmaxlisteners).
 
 
 
 ## API
 ```javascript
-new Queuem()
+let Queue = new Queuem([options])
 ```
 
-### .queue   
+
+## Properties
+
+
+### parallel
+**Type**: _Number_  
+**Default**: `1`   
+Get/set the number of concurrent tasks. Takes effect immediately only when the number increases
+
+
+### queue   
 **Type**: _Array_  
-Queued tasks list   
+Tasks list. Decreases as the tasks are completed
 
 
-### .processing   
+### processing   
 **Type**: _Number_  
 Amount of currently running tasks   
 
 
-### .concurrent
-**Type**: _Number_  
-**Default**: `1`   
-Amount of concurrent tasks   
 
+## Methods
 
-### .add(task[, args])
+### append(task[, data])
 **Type**: _Function_    
-Adds new task. Task should return a promise
+Adds a new task to the end of the queue
+
+
+### prepend(task[, data])
+**Type**: _Function_    
+Adds a new task to the beginning of the queue
+
+
+
+
+## Task
+
+Task function should have two arguments.
+
+### data
+**Type**: _Any_    
+Some data that was passed when the task was created
+
+```javascript
+Queue.prepend(fn, { job_id: 549 })
+```
+
+
+### next
+**Type**: _Function_    
+When you feel like task is done, call `next()` function to pass the slot to the next task in a queue
+
+```javascript
+Queue.append((data, next) => {
+   // data => { job_id: 549 }
+   
+   // Tell the task manager that it can take the next task
+   next();
+
+}, { job_id: 549 })
+```
+
+
+
 
 
 ## Events
 
-### +1
+### added
 Useless event, but let it be
 
-### -1
-Returns task promise result as object `{ error, result }`
 
-### change
-Combination of `+1` and `-1` in a single event
 
-### complete
+
+### done
+Triggered each time a task is completed. If you passed something to the `next()` function, it will be available throught handler function argument
+
+```javascript
+queue.on('done', (result) => {
+   // result => { job_id: 549 }
+})
+```
+
+
+### changed
+Triggered by any changes
+
+```javascript
+queue.on('changed', (e) => {
+   // e.action => 'added' or 'done'
+})
+```
+
+
+### empty
 Fires when queue is empty and there are no running tasks   
+
 
 
 
@@ -60,36 +122,27 @@ Fires when queue is empty and there are no running tasks
 ```javascript
 const Queuem = require('queuem');
 
-let Tasks = new Queuem()
-.on('+1', () => {
-   console.log('+1');
-})
-.on('-1', (result) => {
-   if(result.error){
-      return console.log('-1', '=>', result.error);
-   }
+let queue = new Queuem({ parallel: 2 });
 
-   console.log('-1', '=>', result.data.some_data);
+queue.on('done', (result) => {
+   console.log('done:',  result);
 })
-.on('change', (result) => {
-	console.log(result.type, '=>', result.data);
-})
-.on('complete', () => {
-   console.log('complete');
+
+queue.on('empty', () => {
+   console.log('--- COMPLETED ---');
 })
 
 
-for(let i = 0, len = 20; i < len; i++){
-   Tasks.add(RandomTask, { uid: Math.random().toString(16) });
+
+for (var i = 0; i < 300; i++) {
+   queue.append(Task, { job_id: i })
 }
 
-function RandomTask(data){
-   return new Promise((resolve, reject) => {
-      let time = Date.now();
-      setTimeout(() => {
-         return Math.random() > 0.5 ? resolve({ some_data: data.uid }) : reject('nope');
-      }, Math.random() * 1500);
-   })
+// Let's increase the number of parallel tasks
+setTimeout(() => queue.parallel = 20, 3000);
+
+function Task(data, next){
+   setTimeout(next, Math.random() * 2000, data)
 }
 ```
 
@@ -97,6 +150,10 @@ function RandomTask(data){
 
 
 ## Changelog 
+#### v3.0.0 (2019-09-22):
+- Completely rethought the concept of the module
+
+
 #### v2.3.0 (2019-04-15):
 - fixed argument passing
 - added `change` event
