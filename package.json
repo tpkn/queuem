@@ -1,7 +1,7 @@
 {
    "name": "queuem",
    "main": "queuem.js",
-   "version": "2.3.1",
+   "version": "3.0.0",
    "author": {
       "url": "https://github.com/tpkn/"
    },
@@ -9,11 +9,9 @@
    "license": "MIT",
    "keywords": [
       "queue",
-      "phantom",
       "concurrent",
+      "parallel",
       "task",
-      "limit",
-      "imagemagick",
-      "process"
+      "limit"
    ]
 }
