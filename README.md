@@ -56,6 +56,23 @@ Adds a new task to the beginning of the queue
 
 Task function should have two arguments.
 
+
+### next
+**Type**: _Function_    
+When you feel like task is done, call `next()` function to pass the slot to the next task in a queue
+
+```javascript
+Queue.append((next, data) => {
+   // data => { job_id: 549 }
+   
+   // Tell the task manager that it can take the next task
+   next();
+
+}, { job_id: 549 })
+```
+
+
+
 ### data
 **Type**: _Any_    
 Some data that was passed when the task was created
@@ -64,20 +81,6 @@ Some data that was passed when the task was created
 Queue.prepend(fn, { job_id: 549 })
 ```
 
-
-### next
-**Type**: _Function_    
-When you feel like task is done, call `next()` function to pass the slot to the next task in a queue
-
-```javascript
-Queue.append((data, next) => {
-   // data => { job_id: 549 }
-   
-   // Tell the task manager that it can take the next task
-   next();
-
-}, { job_id: 549 })
-```
 
 
 
@@ -134,14 +137,14 @@ queue.on('empty', () => {
 
 
 
-for (var i = 0; i < 300; i++) {
+for(var i = 0; i < 300; i++){
    queue.append(Task, { job_id: i })
 }
 
 // Let's increase the number of parallel tasks
 setTimeout(() => queue.parallel = 20, 3000);
 
-function Task(data, next){
+function Task(next, data){
    setTimeout(next, Math.random() * 2000, data)
 }
 ```
@@ -150,6 +153,9 @@ function Task(data, next){
 
 
 ## Changelog 
+#### v3.1.0 (2019-09-29):
+- `data` and `next` arguments have been reversed
+
 #### v3.0.0 (2019-09-22):
 - Completely rethought the concept of the module
 

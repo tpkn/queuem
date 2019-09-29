@@ -87,7 +87,7 @@ class Queuem extends EventEmitter {
          this.processing++;
 
          let current = this.queue.shift();
-         current.task.call(null, current.data, (...args) => this._taskDone.apply(this, args));
+         current.task.call(null, (...args) => this._taskDone.apply(this, args), current.data);
       }
    }
 
