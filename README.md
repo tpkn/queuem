@@ -27,6 +27,12 @@ let Queue = new Queuem([options])
 Get/set the number of concurrent tasks. Takes effect immediately only when the number increases
 
 
+### emptyDelay
+**Type**: _Number_  
+**Default**: `0`   
+After the queue is empty, the 'empty' event will be called immediately. This option allows to call the 'empty' event with a certain delay
+
+
 ### queue   
 **Type**: _Array_  
 Tasks list. Decreases as the tasks are completed
@@ -153,28 +159,14 @@ function Task(next, data){
 
 
 ## Changelog 
+#### v3.1.1 (2019-10-01):
+- Added `emptyDelay` option
+
 #### v3.1.0 (2019-09-29):
 - `data` and `next` arguments have been reversed
 
 #### v3.0.0 (2019-09-22):
 - Completely rethought the concept of the module
-
-
-#### v2.3.0 (2019-04-15):
-- fixed argument passing
-- added `change` event
-
-#### v2.2.0 (2019-02-03):
-- events name become shorter (`task_done` => `-1`)
-
-#### v2.1.0 (2018-09-09):
-- additional data could be to passed to queued task
-
-
-#### v2.0.0 (2018-05-12):
-- no more callbacks, just clean and simple events
-- setter of concurrent tasks amount renamed from `con` to `concurrent`
-
 
 #### v1.1.1 (2018-02-18):
 - changed API, now constructor has only one argument
