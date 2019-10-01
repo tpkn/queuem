@@ -29,7 +29,6 @@ Get/set the number of concurrent tasks. Takes effect immediately only when the n
 
 ### emptyDelay
 **Type**: _Number_  
-**Default**: `0`   
 After the queue is empty, the 'empty' event will be called immediately. This option allows to call the 'empty' event with a certain delay
 
 
