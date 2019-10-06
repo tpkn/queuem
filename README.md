@@ -59,7 +59,7 @@ Adds a new task to the beginning of the queue
 
 ## Task
 
-Task function should have two arguments.
+Task function should have three arguments
 
 
 ### next
@@ -88,6 +88,28 @@ Queue.prepend(fn, { job_id: 549 })
 
 
 
+### task
+**Type**: _Function_    
+Worker's function, just in case you want to run the task one more time
+
+```javascript
+Queue.append((next, data, task) => {
+   if(data.error){
+   	// Append failed task to the queue
+		data.retries = data.retry + 1 || 1;
+
+		if(data.retries < 10){
+			Queue.append(task, data);
+		}
+   }
+   
+   next();
+
+}, { job_id: 549 })
+```
+
+
+
 
 
 
@@ -103,7 +125,7 @@ Useless event, but let it be
 Triggered each time a task is completed. If you passed something to the `next()` function, it will be available throught handler function argument
 
 ```javascript
-queue.on('done', (result) => {
+Queue.on('done', (result) => {
    // result => { job_id: 549 }
 })
 ```
@@ -113,7 +135,7 @@ queue.on('done', (result) => {
 Triggered by any changes
 
 ```javascript
-queue.on('changed', (e) => {
+Queue.on('changed', (e) => {
    // e.action => 'added' or 'done'
 })
 ```
@@ -130,24 +152,24 @@ Fires when queue is empty and there are no running tasks
 ```javascript
 const Queuem = require('queuem');
 
-let queue = new Queuem({ parallel: 2 });
+let Queue = new Queuem({ parallel: 2 });
 
-queue.on('done', (result) => {
+Queue.on('done', (result) => {
    console.log('done:',  result);
 })
 
-queue.on('empty', () => {
+Queue.on('empty', () => {
    console.log('--- COMPLETED ---');
 })
 
 
 
 for(var i = 0; i < 300; i++){
-   queue.append(Task, { job_id: i })
+   Queue.append(Task, { job_id: i })
 }
 
 // Let's increase the number of parallel tasks
-setTimeout(() => queue.parallel = 20, 3000);
+setTimeout(() => Queue.parallel = 20, 3000);
 
 function Task(next, data){
    setTimeout(next, Math.random() * 2000, data)
@@ -158,6 +180,9 @@ function Task(next, data){
 
 
 ## Changelog 
+#### v3.2.0 (2019-10-06):
+- Added `task` argument
+
 #### v3.1.1 (2019-10-01):
 - Added `emptyDelay` option
 
@@ -168,7 +193,7 @@ function Task(next, data){
 - Completely rethought the concept of the module
 
 #### v1.1.1 (2018-02-18):
-- changed API, now constructor has only one argument
-- added callback function for each finished task
-- added `con` setter to changes the amount of concurrent tasks 'on the fly'
+- Changed API, now constructor has only one argument
+- Added callback function for each finished task
+- Added `con` setter to changes the amount of concurrent tasks 'on the fly'
 
