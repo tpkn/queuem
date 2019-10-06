@@ -90,13 +90,13 @@ Queue.prepend(fn, { job_id: 549 })
 
 ### task
 **Type**: _Function_    
-Worker's function, just in case you want to run the task one more time
+Task function, just in case you want to run the task one more time
 
 ```javascript
 Queue.append((next, data, task) => {
    if(data.error){
       // Append failed task to the queue
-      data.retries = data.retry + 1 || 1;
+      data.retries = data.retries + 1 || 1;
 
       if(data.retries < 10){
          Queue.append(task, data);
