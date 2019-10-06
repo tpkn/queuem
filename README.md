@@ -95,12 +95,12 @@ Worker's function, just in case you want to run the task one more time
 ```javascript
 Queue.append((next, data, task) => {
    if(data.error){
-   	// Append failed task to the queue
-		data.retries = data.retry + 1 || 1;
+      // Append failed task to the queue
+      data.retries = data.retry + 1 || 1;
 
-		if(data.retries < 10){
-			Queue.append(task, data);
-		}
+      if(data.retries < 10){
+         Queue.append(task, data);
+      }
    }
    
    next();
