@@ -80,7 +80,7 @@ Queue.append((next, data) => {
 
 ### data
 **Type**: _Any_    
-Some data that was passed when the task was created
+Some data that needs to be passed into the task
 
 ```javascript
 Queue.prepend(fn, { job_id: 549 })
@@ -91,22 +91,6 @@ Queue.prepend(fn, { job_id: 549 })
 ### task
 **Type**: _Function_    
 Task function, just in case you want to run the task one more time
-
-```javascript
-Queue.append((next, data, task) => {
-   if(data.error){
-      // Append failed task to the queue
-      data.retries = data.retries + 1 || 1;
-
-      if(data.retries < 10){
-         Queue.append(task, data);
-      }
-   }
-   
-   next();
-
-}, { job_id: 549 })
-```
 
 
 
@@ -152,7 +136,7 @@ Fires when queue is empty and there are no running tasks
 ```javascript
 const Queuem = require('queuem');
 
-let Queue = new Queuem({ parallel: 2 });
+let Queue = new Queuem({ parallel: 2, emptyDelay: 5000 });
 
 Queue.on('done', (result) => {
    console.log('done:',  result);
@@ -168,12 +152,21 @@ for(var i = 0; i < 300; i++){
    Queue.append(Task, { job_id: i })
 }
 
-// Let's increase the number of parallel tasks
-setTimeout(() => Queue.parallel = 20, 3000);
+function Task(next, data, task){
+   if(data.error){
+      // Append failed task to the queue
+      data.retries = data.retries + 1 || 1;
 
-function Task(next, data){
+      if(data.retries < 10){
+         Queue.append(task, data);
+      }
+   }
+
    setTimeout(next, Math.random() * 2000, data)
 }
+
+// Let's increase the number of parallel tasks
+setTimeout(() => Queue.parallel = 50, 3000);
 ```
 
 
