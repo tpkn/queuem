@@ -154,7 +154,7 @@ for(var i = 0; i < 300; i++){
 
 function Task(next, data, task){
    if(data.error){
-      // Append failed task to the queue
+      // Append failed task back to the queue
       data.retries = data.retries + 1 || 1;
 
       if(data.retries < 10){
