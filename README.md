@@ -55,6 +55,20 @@ Adds a new task to the end of the queue
 Adds a new task to the beginning of the queue
 
 
+### pause()
+**Type**: _Function_    
+Pauses processing the queue. But you can still add tasks in the queue
+
+
+### resume()
+**Type**: _Function_    
+
+
+### flush()
+**Type**: _Function_    
+Clears the queue. Already running tasks would not be killed. `empty` event would be called immediately if there are no processing tasks
+
+
 
 
 ## Task

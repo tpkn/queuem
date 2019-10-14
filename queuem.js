@@ -20,6 +20,7 @@ class Queuem extends EventEmitter {
 
       // Make some variables non-enumerable
       Object.defineProperty(this, '_tid', { writable: true });
+      Object.defineProperty(this, '_paused', { writable: true, value: false });
       Object.defineProperty(this, '_parallel', { writable: true, value: 1 });
       Object.defineProperty(this, '_emptyDelay', { writable: true, value: 0 });
 
@@ -40,6 +41,26 @@ class Queuem extends EventEmitter {
 
    prepend(task, data) {
       this._addTask(task, data, { prepend: true });
+   }
+
+
+   /**
+    * Controls
+    */
+   pause() {
+      this._paused = true;
+   }
+
+   resume() {
+      this._paused = false;
+      this._nextTask();
+   }
+   
+   flush() {
+      this.queue = [];
+      if(this.processing == 0){
+         this.emit(Events.QUEUE_EMPTY);
+      }
    }
 
 
@@ -103,11 +124,13 @@ class Queuem extends EventEmitter {
    }
 
    _nextTask() {
-      if (this.queue.length > 0) {
-         this.processing++;
+      if(!this._paused){
+         if (this.queue.length > 0) {
+            this.processing++;
 
-         let { data, task } = this.queue.shift();
-         task.call(null, (...args) => this._taskDone.apply(this, args), data, task);
+            let { data, task } = this.queue.shift();
+            task.call(null, (...args) => this._taskDone.apply(this, args), data, task);
+         }
       }
    }
 
