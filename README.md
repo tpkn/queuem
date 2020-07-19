@@ -1,7 +1,8 @@
 # Queuem [![npm Package](https://img.shields.io/npm/v/queuem.svg)](https://www.npmjs.org/package/queuem)
-Run a sh*tload of tasks in parallel
+The simpliest queue for Node.js you've ever seen
 
-It is made for cases when you need to run 1,000,000 tasks (parsing files, API requests, etc.) in your app, and not hear from Node.js whining that it cannot do something because of some limitations.
+
+It is made for cases when you need to run 1,000,000 tasks (parsing files, API requests, etc.) in a queue.
 
 Was originally made for [Page Check](https://www.npmjs.com/package/page-check) module.
 
